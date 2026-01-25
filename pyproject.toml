@@ -1,0 +1,93 @@
+[build-system]
+requires = [
+  "setuptools>=65.0",
+  "wheel",
+  "cython>=0.29.0",
+  "numpy>=1.24",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-earth"
+dynamic = ["version", "readme"]
+license = {file = "LICENSE.txt"}
+description = "A Python implementation of Jerome Friedman's Multivariate Adaptive Regression Splines."
+authors = [
+  {name = "Jason Rudy", email = "jcrudy@gmail.com"}
+]
+requires-python = ">=3.11"
+classifiers = [
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Operating System :: Unix",
+  "Programming Language :: Cython",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development",
+]
+
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=0.16",
+  "scikit-learn>=0.16",
+]
+
+[project.optional-dependencies]
+dev = ["cython>=0.29.0", "pytest", "pytest-cov", "ruff", "mypy"]
+docs = ["sphinx-gallery"]
+export = ["sympy"]
+all-tests = ["pandas", "statsmodels", "patsy", "sympy"]
+
+[project.urls]
+Homepage = "https://github.com/scikit-learn-contrib/py-earth"
+Repository = "https://github.com/scikit-learn-contrib/py-earth"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pyearth.__version__"}
+readme = {file = ["README.md"], content-type = "text/markdown"}
+
+[tool.setuptools.extensions]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "W"]
+ignore = []
+exclude = ["build", "dist", "*.egg-info", ".git", "__pycache__", "*.pyc"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+markers = [
+  "slow: marks tests as slow",
+]
+
+[tool.cibuildwheel]
+build = "cp311-* cp312-* cp313-*"
+skip = "*-musllinux_*"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+before-all = "yum install -y gcc-c++"
+
+[tool.cibuildwheel.macos.environment]
+MACOSX_DEPLOYMENT_TARGET = "10.9"
