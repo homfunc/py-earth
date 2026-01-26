@@ -1,7 +1,7 @@
 cimport cython
-from _types cimport FLOAT_t, INT_t, INDEX_t, BOOL_t
-from _basis cimport BasisFunction
-from _qr cimport UpdatingQT
+from pyearth._types cimport FLOAT_t, INT_t, INDEX_t, BOOL_t
+from pyearth._basis cimport BasisFunction
+from pyearth._qr cimport UpdatingQT
 
 @cython.final
 cdef class SingleWeightDependentData:

@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "py-earth"
 version = "0.1.0"
 description = "A Python implementation of Jerome Friedman's Multivariate Adaptive Regression Splines"
@@ -13,6 +13,7 @@ python = ">=3.11"
 numpy = ">=1.24"
 scipy = ">=0.16"
 scikit-learn = ">=0.16"
+pip = ">=25.3,<26"
 
 [feature.dev.dependencies]
 cython = ">=0.29.0"
@@ -20,7 +21,8 @@ pytest = ">=7.0"
 pytest-cov = ">=2.12"
 ruff = ">=0.1.0"
 mypy = ">=1.0"
-build = ">=0.10"
+setuptools-scm = "*"
+wheel = "*"
 
 [feature.docs.dependencies]
 sphinx-gallery = ">=0.7"

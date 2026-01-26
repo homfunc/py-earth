@@ -1,15 +1,15 @@
 [build-system]
 requires = [
-  "setuptools>=65.0",
+  "setuptools>=68.0",
   "wheel",
-  "cython>=0.29.0",
-  "numpy>=1.24",
+  "cython>=3.0",
+  "numpy",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-earth"
-dynamic = ["version", "readme"]
+version = "0.1.0"
 license = {file = "LICENSE.txt"}
 description = "A Python implementation of Jerome Friedman's Multivariate Adaptive Regression Splines."
 authors = [
@@ -56,12 +56,6 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.dynamic]
-version = {attr = "pyearth.__version__"}
-readme = {file = ["README.md"], content-type = "text/markdown"}
-
-[tool.setuptools.extensions]
 
 [tool.ruff]
 line-length = 100
