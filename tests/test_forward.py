@@ -49,4 +49,4 @@ def test_run():
 #         fl.write(res)
     with open(filename, 'r') as fl:
         prev = fl.read()
-    assert_equal(res, prev)
+    assert res ==  prev

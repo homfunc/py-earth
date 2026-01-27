@@ -20,9 +20,9 @@ def test_apply():
     m, _ = cnt.X.shape
     missing = numpy.zeros_like(cnt.X, dtype=BOOL)
     B = numpy.empty(shape=(m, 10))
-    assert_false(numpy.all(B[:, 0] == 1))
+    assert not numpy.all(B[:, 0] == 1)
     cnt.bf.apply(cnt.X, missing, B[:, 0])
-    assert_true(numpy.all(B[:, 0] == 1))
+    assert numpy.all(B[:, 0] == 1)
 
 
 def test_deriv():
@@ -32,17 +32,17 @@ def test_deriv():
     b = numpy.empty(shape=m)
     j = numpy.empty(shape=m)
     cnt.bf.apply_deriv(cnt.X, missing, b, j, 1)
-    assert_true(numpy.all(b == 1))
-    assert_true(numpy.all(j == 0))
+    assert numpy.all(b == 1)
+    assert numpy.all(j == 0)
 
 
 def test_pickle_compatibility():
     cnt = Container()
     bf_copy = pickle.loads(pickle.dumps(cnt.bf))
-    assert_true(cnt.bf == bf_copy)
+    assert cnt.bf == bf_copy
 
 
 def test_smoothed_version():
     cnt = Container()
     smoothed = cnt.bf._smoothed_version(None, {}, {})
-    assert_true(type(smoothed) is ConstantBasisFunction)
+    assert type(smoothed) is ConstantBasisFunction

@@ -30,12 +30,12 @@ class Container(BaseContainer):
 def test_anova_decomp():
     cnt = Container()
     anova = cnt.basis.anova_decomp()
-    assert_equal(set(anova[frozenset([1])]), set([cnt.bf1]))
+    assert set(anova[frozenset([1])]) ==  set([cnt.bf1])
     assert_equal(set(anova[frozenset([2])]), set([cnt.bf2, cnt.bf4,
                                                   cnt.bf5]))
-    assert_equal(set(anova[frozenset([2, 3])]), set([cnt.bf3]))
-    assert_equal(set(anova[frozenset()]), set([cnt.parent]))
-    assert_equal(len(anova), 4)
+    assert set(anova[frozenset([2 ==  3]]), set([cnt.bf3]))
+    assert set(anova[frozenset()]) ==  set([cnt.parent])
+    assert len(anova) ==  4
 
 
 def test_smooth_knots():
@@ -43,11 +43,11 @@ def test_smooth_knots():
     mins = [0.0, -1.0, 0.1, 0.2]
     maxes = [2.5, 3.5, 3.0, 2.0]
     knots = cnt.basis.smooth_knots(mins, maxes)
-    assert_equal(knots[cnt.bf1], (0.0, 2.25))
-    assert_equal(knots[cnt.bf2], (0.55, 1.25))
-    assert_equal(knots[cnt.bf3], (0.6,  1.5))
-    assert_true(cnt.bf4 not in knots)
-    assert_equal(knots[cnt.bf5], (1.25, 2.25))
+    assert knots[cnt.bf1] ==  (0.0, 2.25)
+    assert knots[cnt.bf2] ==  (0.55, 1.25)
+    assert knots[cnt.bf3] ==  (0.6,  1.5)
+    assert cnt.bf4 not in knots
+    assert knots[cnt.bf5] ==  (1.25, 2.25)
 
 
 def test_smooth():
@@ -56,26 +56,26 @@ def test_smooth():
     smooth_basis = cnt.basis.smooth(X)
     for bf, smooth_bf in zip(cnt.basis, smooth_basis):
         if type(bf) is HingeBasisFunction:
-            assert_true(type(smooth_bf) is SmoothedHingeBasisFunction)
+            assert type(smooth_bf) is SmoothedHingeBasisFunction
         elif type(bf) is ConstantBasisFunction:
-            assert_true(type(smooth_bf) is ConstantBasisFunction)
+            assert type(smooth_bf) is ConstantBasisFunction
         elif type(bf) is LinearBasisFunction:
-            assert_true(type(smooth_bf) is LinearBasisFunction)
+            assert type(smooth_bf) is LinearBasisFunction
         else:
             raise AssertionError('Basis function is of an unexpected type.')
-        assert_true(type(smooth_bf) in {SmoothedHingeBasisFunction,
+        assert type(smooth_bf in {SmoothedHingeBasisFunction,
                                         ConstantBasisFunction,
                                         LinearBasisFunction})
         if bf.has_knot():
-            assert_equal(bf.get_knot(), smooth_bf.get_knot())
+            assert bf.get_knot() ==  smooth_bf.get_knot()
 
 
 def test_add():
     cnt = Container()
-    assert_equal(len(cnt.basis), 6)
+    assert len(cnt.basis) ==  6
 
 
 def test_pickle_compat():
     cnt = Container()
     basis_copy = pickle.loads(pickle.dumps(cnt.basis))
-    assert_true(cnt.basis == basis_copy)
+    assert cnt.basis == basis_copy

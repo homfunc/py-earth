@@ -4,13 +4,10 @@
 # cython: wraparound = False
 # cython: profile = False
 import numpy as np
-from _types import BOOL, FLOAT
-
-# Import scipy cython interfaces for LAPACK functions
-# Use d type from scipy for compatibility with LAPACK functions
-from scipy.linalg.cython_lapack cimport dlarfg, dlarft, dlarfb, d
+from scipy.linalg.cython_lapack cimport dlarfg, dlarft, dlarfb
 from scipy.linalg.cython_blas cimport dcopy
 from libc.math cimport abs
+from _types import BOOL, FLOAT
 
 cdef class UpdatingQT:
     def __init__(UpdatingQT self, int m, int max_n, Householder householder, 
@@ -187,80 +184,81 @@ cdef class Householder:
         
     cpdef void left_apply(Householder self, FLOAT_t[::1, :] C):
         cdef char side = 'L'
-        cdef char trans = 'T'
+        cdef char trans = 'N'
         cdef char direct = 'F'
         cdef char storev = 'C'
-        cdef int m = C.shape[0]
-        cdef int n = C.shape[1]
-        cdef int k = self.k
+        cdef int M = C.shape[0]
+        cdef int N = C.shape[1]
+        cdef int K = self.k
         cdef FLOAT_t * V = <FLOAT_t *> &(self.V[0, 0])
         cdef int ldv = self.m
         cdef FLOAT_t * T = <FLOAT_t *> &(self.T[0, 0])
         cdef int ldt = self.max_n
         cdef FLOAT_t * C_arg = <FLOAT_t *> &(C[0, 0])
         cdef int ldc = C.strides[1] // C.itemsize
-        cdef FLOAT_t * work_ptr = <FLOAT_t *> &(self.work[0,0])
+        cdef FLOAT_t * work = <FLOAT_t *> &(self.work[0,0])
         cdef int ldwork = self.m
-
-        dlarfb(&side, &trans, &direct, &storev, &m, &n, &k,
-               V, &ldv, T, &ldt, C_arg, &ldc, work_ptr, &ldwork)
-
+        print C.shape
+        dlarfb(&side, &trans, &direct, &storev, &M, &N, &K, 
+               V, &ldv, T, &ldt, C_arg, &ldc, work, &ldwork)
+        
     cpdef void left_apply_transpose(Householder self, FLOAT_t[::1, :] C):
         cdef char side = 'L'
         cdef char trans = 'T'
         cdef char direct = 'F'
         cdef char storev = 'C'
-        cdef int m = C.shape[0]
-        cdef int n = C.shape[1]
-        cdef int k = self.k
+        cdef int M = C.shape[0]
+        cdef int N = C.shape[1]
+        cdef int K = self.k
         cdef FLOAT_t * V = <FLOAT_t *> &(self.V[0, 0])
         cdef int ldv = self.m
         cdef FLOAT_t * T = <FLOAT_t *> &(self.T[0, 0])
         cdef int ldt = self.max_n
         cdef FLOAT_t * C_arg = <FLOAT_t *> &(C[0, 0])
         cdef int ldc = C.strides[1] // C.itemsize
-        cdef FLOAT_t * work_ptr = <FLOAT_t *> &(self.work[0,0])
+        cdef FLOAT_t * work = <FLOAT_t *> &(self.work[0,0])
         cdef int ldwork = self.m
-
-        dlarfb(&side, &trans, &direct, &storev, &m, &n, &k,
-               V, &ldv, T, &ldt, C_arg, &ldc, work_ptr, &ldwork)
-
+        
+        dlarfb(&side, &trans, &direct, &storev, &M, &N, &K, 
+               V, &ldv, T, &ldt, C_arg, &ldc, work, &ldwork)
+    
     cpdef void right_apply(Householder self, FLOAT_t[::1, :] C):
         cdef char side = 'R'
-        cdef char trans = 'T'
+        cdef char trans = 'N'
         cdef char direct = 'F'
         cdef char storev = 'C'
-        cdef int m = C.shape[0]
-        cdef int n = C.shape[1]
-        cdef int k = self.k
+        cdef int M = C.shape[0]
+        cdef int N = C.shape[1]
+        cdef int K = self.k
         cdef FLOAT_t * V = <FLOAT_t *> &(self.V[0, 0])
         cdef int ldv = self.m
         cdef FLOAT_t * T = <FLOAT_t *> &(self.T[0, 0])
         cdef int ldt = self.max_n
         cdef FLOAT_t * C_arg = <FLOAT_t *> &(C[0, 0])
         cdef int ldc = C.strides[1] // C.itemsize
-        cdef FLOAT_t * work_ptr = <FLOAT_t *> &(self.work[0,0])
+        cdef FLOAT_t * work = <FLOAT_t *> &(self.work[0,0])
         cdef int ldwork = self.m
-
-        dlarfb(&side, &trans, &direct, &storev, &m, &n, &k,
-               V, &ldv, T, &ldt, C_arg, &ldc, work_ptr, &ldwork)
-
+        
+        dlarfb(&side, &trans, &direct, &storev, &M, &N, &K, 
+               V, &ldv, T, &ldt, C_arg, &ldc, work, &ldwork)
+        
     cpdef void right_apply_transpose(Householder self, FLOAT_t[::1, :] C):
         cdef char side = 'R'
         cdef char trans = 'T'
         cdef char direct = 'F'
         cdef char storev = 'C'
-        cdef int m = C.shape[0]
-        cdef int n = C.shape[1]
-        cdef int k = self.k
+        cdef int M = C.shape[0]
+        cdef int N = C.shape[1]
+        cdef int K = self.k
         cdef FLOAT_t * V = <FLOAT_t *> &(self.V[0, 0])
         cdef int ldv = self.m
         cdef FLOAT_t * T = <FLOAT_t *> &(self.T[0, 0])
         cdef int ldt = self.max_n
         cdef FLOAT_t * C_arg = <FLOAT_t *> &(C[0, 0])
         cdef int ldc = C.strides[1] // C.itemsize
-        cdef FLOAT_t * work_ptr = <FLOAT_t *> &(self.work[0,0])
+        cdef FLOAT_t * work = <FLOAT_t *> &(self.work[0,0])
         cdef int ldwork = self.m
-
-        dlarfb(&side, &trans, &direct, &storev, &m, &n, &k,
-               V, &ldv, T, &ldt, C_arg, &ldc, work_ptr, &ldwork)
+        
+        dlarfb(&side, &trans, &direct, &storev, &M, &N, &K, 
+               V, &ldv, T, &ldt, C_arg, &ldc, work, &ldwork)
+#         

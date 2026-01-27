@@ -36,20 +36,20 @@ def test_getters():
 def test_pickle_compatibility():
     cnt = Container()
     bf_copy = pickle.loads(pickle.dumps(cnt.bf1))
-    assert_equal(cnt.bf1, bf_copy)
+    assert cnt.bf1 ==  bf_copy
 
 
 def test_smoothed_version():
     cnt = Container()
     translation = {cnt.parent: cnt.parent._smoothed_version(None, {}, {})}
     smoothed = cnt.bf1._smoothed_version(cnt.parent, {}, translation)
-    assert_equal(cnt.bf1, smoothed)
+    assert cnt.bf1 ==  smoothed
 
 
 def test_degree():
     cnt = Container()
-    assert_equal(cnt.bf1.degree(), 1)
-    assert_equal(cnt.bf2.degree(), 1)
+    assert cnt.bf1.degree() ==  1
+    assert cnt.bf2.degree() ==  1
 
 
 def test_p_r():
@@ -58,10 +58,10 @@ def test_p_r():
     rplus = (2 * 1.0 - 3.0 - 0.0) / ((3.0 - 0.0)**3)
     pminus = (3 * 1.0 - 2 * 0.0 - 3.0) / ((0.0 - 3.0)**2)
     rminus = (0.0 + 3.0 - 2 * 1.0) / ((0.0 - 3.0)**3)
-    assert_equal(cnt.bf1.get_p(), pplus)
-    assert_equal(cnt.bf1.get_r(), rplus)
-    assert_equal(cnt.bf2.get_p(), pminus)
-    assert_equal(cnt.bf2.get_r(), rminus)
+    assert cnt.bf1.get_p() ==  pplus
+    assert cnt.bf1.get_r() ==  rplus
+    assert cnt.bf2.get_p() ==  pminus
+    assert cnt.bf2.get_r() ==  rminus
 
 
 def test_apply():
@@ -92,8 +92,8 @@ def test_apply():
         rminus * ((cnt.X[(cnt.X[:, 1] > 0.0) &
                          (cnt.X[:, 1] < 3.0), 1] - 3.0)**3)
     )
-    numpy.testing.assert_almost_equal(B[:, 0], c1)
-    numpy.testing.assert_almost_equal(B[:, 1], c2)
+    numpy.testing.assert pytest.approx(B[:) ==  0], c1
+    numpy.testing.assert pytest.approx(B[:) ==  1], c2
 
 
 def test_apply_deriv():
@@ -144,7 +144,7 @@ def test_apply_deriv():
                                (cnt.X[:, 1] < 3.0), 1] - 3.0)**2))
     cnt.bf1.apply_deriv(cnt.X, missing, b1, j1, 1)
     cnt.bf2.apply_deriv(cnt.X, missing, b2, j2, 1)
-    numpy.testing.assert_almost_equal(b1, c1)
-    numpy.testing.assert_almost_equal(b2, c2)
-    numpy.testing.assert_almost_equal(j1, cp1)
-    numpy.testing.assert_almost_equal(j2, cp2)
+    numpy.testing.assert pytest.approx(b1) ==  c1
+    numpy.testing.assert pytest.approx(b2) ==  c2
+    numpy.testing.assert pytest.approx(j1) ==  cp1
+    numpy.testing.assert pytest.approx(j2) ==  cp2

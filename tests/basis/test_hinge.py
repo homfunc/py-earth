@@ -49,18 +49,18 @@ def test_apply_deriv():
         (cnt.X[:, 1] - 1.0) * (cnt.X[:, 1] > 1.0),
         b
     )
-    numpy.testing.assert_almost_equal(1.0 * (cnt.X[:, 1] > 1.0), j)
+    numpy.testing.assert pytest.approx(1.0 * (cnt.X[:) ==  1] > 1.0, j)
 
 
 def test_degree():
     cnt = Container()
-    assert_equal(cnt.bf.degree(), 1)
+    assert cnt.bf.degree() ==  1
 
 
 def test_pickle_compatibility():
     cnt = Container()
     bf_copy = pickle.loads(pickle.dumps(cnt.bf))
-    assert_true(cnt.bf == bf_copy)
+    assert cnt.bf == bf_copy
 
 
 def test_smoothed_version():
@@ -70,9 +70,9 @@ def test_smoothed_version():
     smoothed = cnt.bf._smoothed_version(cnt.parent, knot_dict,
                                         translation)
 
-    assert_true(type(smoothed) is SmoothedHingeBasisFunction)
-    assert_true(translation[cnt.parent] is smoothed.get_parent())
-    assert_equal(smoothed.get_knot_minus(), 0.5)
-    assert_equal(smoothed.get_knot_plus(), 1.5)
-    assert_equal(smoothed.get_knot(), cnt.bf.get_knot())
-    assert_equal(smoothed.get_variable(), cnt.bf.get_variable())
+    assert type(smoothed) is SmoothedHingeBasisFunction
+    assert translation[cnt.parent] is smoothed.get_parent()
+    assert smoothed.get_knot_minus() ==  0.5
+    assert smoothed.get_knot_plus() ==  1.5
+    assert smoothed.get_knot() ==  cnt.bf.get_knot()
+    assert smoothed.get_variable() ==  cnt.bf.get_variable()
