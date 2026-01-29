@@ -9,13 +9,10 @@ from libc.math cimport log
 from libc.math cimport abs
 cimport cython
 cdef FLOAT_t ZERO_TOL = 1e-16
-from pyearth._types import FLOAT
+from pyearth._types import FLOAT, INT
 import numpy as np
 import sys
-import six
-
-# Python 3 compatibility
-max_int = sys.maxint if six.PY2 else sys.maxsize
+max_int = sys.maxsize
 
 cdef class BasisFunction:
 
@@ -327,7 +324,7 @@ cdef class BasisFunction:
                     break
 
         # Create result array and return
-        result = np.empty(shape=count, dtype=int)
+        result = np.empty(shape=count, dtype=INT)
         j = 0
         for i in range(m):
             if workspace[i]:
@@ -436,7 +433,7 @@ cdef class ConstantBasisFunction(RootBasisFunction):
 
     def func_string_factory(ConstantBasisFunction self, coef):
         if coef is not None:
-            return "lambda x: {:s}".format(repr(coef))
+            return "lambda x: {:s}".format(repr(float(coef)))
         else:
             return ''
         

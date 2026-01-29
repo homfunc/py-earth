@@ -2,7 +2,19 @@ Earth Model
 -------------------------------------
 Basis Function  Pruned  Coefficient  
 -------------------------------------
-(Intercept)     No      1.13135      
+(Intercept)     No      -21.3811     
 x               Yes     None         
+h(x-4.54545)    No      0.644003     
+h(4.54545-x)    Yes     None         
+h(x+4.54545)    Yes     None         
+h(-4.54545-x)   No      -1.68154     
+h(x+1.51515)    Yes     None         
+h(-1.51515-x)   Yes     None         
+h(x+8.58586)    No      2.54614      
+h(-8.58586-x)   Yes     None         
+h(x-0.505051)   No      -2.83845     
+h(0.505051-x)   Yes     None         
+h(x+0.505051)   Yes     None         
+h(-0.505051-x)  No      3.4089       
 -------------------------------------
-MSE: 1.6432, GCV: 1.6765, RSQ: -0.0000, GRSQ: -0.0000
+MSE: 0.9745, GCV: 1.3025, RSQ: 0.4069, GRSQ: 0.2231

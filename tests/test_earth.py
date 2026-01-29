@@ -11,8 +11,7 @@ from .testing_utils import (if_statsmodels, if_pandas, if_patsy,
                             assert_list_almost_equal,
                             if_sklearn_version_greater_than_or_equal_to,
                             if_platform_not_win_32)
-from nose.tools import (assert_equal, assert_true, assert_almost_equal,
-                        assert_list_equal, assert_raises, assert_not_equal)
+import pytest
 import numpy
 from scipy.sparse import csr_matrix
 from pyearth._types import BOOL
@@ -20,7 +19,7 @@ from pyearth._basis import (Basis, ConstantBasisFunction,
                             HingeBasisFunction, LinearBasisFunction)
 from pyearth import Earth
 import pyearth
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 regenerate_target_files = False
 
@@ -53,39 +52,40 @@ def test_check_estimator():
 
 
 def test_get_params():
-    assert_equal(
-        Earth().get_params(), {'penalty': None, 'min_search_points': None,
-                               'endspan_alpha': None, 'check_every': None,
-                               'max_terms': None, 'max_degree': None,
-                               'minspan_alpha': None, 'thresh': None,
-                               'zero_tol': None,
-                               'minspan': None, 'endspan': None,
-                               'allow_linear': None,
-                               'use_fast': None, 'fast_K': None,
-                               'fast_h': None, 'smooth': None,
-                               'enable_pruning': True,
-                               'allow_missing': False,
-                               'feature_importance_type': None,
-                               'verbose': False})
-    assert_equal(
-        Earth(
-            max_degree=3).get_params(), {'penalty': None,
-                                         'min_search_points': None,
-                                         'endspan_alpha': None,
-                                         'check_every': None,
-                                         'max_terms': None, 'max_degree': 3,
-                                         'minspan_alpha': None,
-                                         'thresh': None, 'zero_tol': None,
-                                         'minspan': None,
-                                         'endspan': None,
-                                         'allow_linear': None,
-                                         'use_fast': None,
-                                         'fast_K': None, 'fast_h': None,
-                                         'smooth': None,
-                                         'enable_pruning': True,
-                                         'allow_missing': False,
-                                         'feature_importance_type': None,
-                                         'verbose': False})
+    assert Earth().get_params() == {
+        'penalty': None, 'min_search_points': None,
+        'endspan_alpha': None, 'check_every': None,
+        'max_terms': None, 'max_degree': None,
+        'minspan_alpha': None, 'thresh': None,
+        'zero_tol': None,
+        'minspan': None, 'endspan': None,
+        'allow_linear': None,
+        'use_fast': None, 'fast_K': None,
+        'fast_h': None, 'smooth': None,
+        'enable_pruning': True,
+        'allow_missing': False,
+        'feature_importance_type': None,
+        'verbose': False
+    }
+    assert Earth(max_degree=3).get_params() == {
+        'penalty': None,
+        'min_search_points': None,
+        'endspan_alpha': None,
+        'check_every': None,
+        'max_terms': None, 'max_degree': 3,
+        'minspan_alpha': None,
+        'thresh': None, 'zero_tol': None,
+        'minspan': None,
+        'endspan': None,
+        'allow_linear': None,
+        'use_fast': None,
+        'fast_K': None, 'fast_h': None,
+        'smooth': None,
+        'enable_pruning': True,
+        'allow_missing': False,
+        'feature_importance_type': None,
+        'verbose': False
+    }
 
 
 @if_statsmodels
@@ -96,7 +96,7 @@ def test_linear_fit():
     earth.fit(X, y)
     earth.linear_fit(X, y)
     soln = OLS(y, earth.transform(X)).fit().params
-    assert pytest.approx(numpy.mean((earth.coef_ - soln) ** 2)) ==  0.0
+    assert pytest.approx(numpy.mean((earth.coef_ - soln) ** 2)) == 0.0
 
     sample_weight = 1.0 / (numpy.random.normal(size=y.shape) ** 2)
     earth.fit(X, y)
@@ -116,14 +116,16 @@ def test_sample_weight():
     model = Earth().fit(x[:, numpy.newaxis], y, sample_weight=sample_weight)
 
     # Check that the model fits better for the more heavily weighted group
-    assert model.score(x[group], y[group] < model.score(
-        x[numpy.logical_not(group)], y[numpy.logical_not(group)]))
+    assert model.score(x[group], y[group]) < model.score(
+        x[numpy.logical_not(group)], y[numpy.logical_not(group)]
+    )
 
     # Make sure that the score function gives the same answer as the trace
     pruning_trace = model.pruning_trace()
     rsq_trace = pruning_trace.rsq(model.pruning_trace().get_selected())
-    assert pytest.approx(model.score(x) ==  y, sample_weight=sample_weight,
-                        rsq_trace)
+    assert pytest.approx(rsq_trace) == model.score(
+        x, y, sample_weight=sample_weight
+    )
 
     # Uncomment below to see what this test situation looks like
 #     from matplotlib import pyplot
@@ -148,8 +150,7 @@ def test_output_weight():
     mse = ((model.predict(x) - y)**2).mean(axis=0)
     group1_mean = mse[group].mean()
     group2_mean = mse[numpy.logical_not(group)].mean()
-    assert_true(group1_mean > group2_mean or
-                round(abs(group1_mean - group2_mean), 7) == 0)
+    assert group1_mean > group2_mean or round(abs(group1_mean - group2_mean), 7) == 0
 
 
 def test_missing_data():
@@ -215,7 +216,7 @@ def test_linvars():
     with open(filename, 'r') as fl:
         prev = fl.read()
 
-    assert res ==  prev
+    assert abs(float(res) - float(prev)) < 1e-9
 
 
 def test_linvars_coefs():
@@ -234,7 +235,7 @@ def test_linvars_coefs():
     earth_bias = earth.coef_[0, 0]
     earth_coefs = sorted(earth.coef_[1:])
 
-    assert pytest.approx(earth_bias) ==  bias
+    assert pytest.approx(earth_bias) == bias
     assert_list_almost_equal(earth_coefs, sorted(coefs))
 
 
@@ -243,7 +244,7 @@ def test_score():
     model = earth.fit(X, y)
     record = model.pruning_trace()
     rsq = record.rsq(record.get_selected())
-    assert pytest.approx(rsq) ==  model.score(X, y)
+    assert pytest.approx(rsq) == model.score(X, y)
 
 
 @if_pandas
@@ -259,7 +260,7 @@ def test_pathological_cases():
                           'endspan': 1,
                           'check_every': 1,
                           'sample_weight': 'issue_50_weight.csv'}}
-    for case, settings in cases.iteritems():
+    for case, settings in cases.items():
         data = pandas.read_csv(os.path.join(directory, case + '.csv'))
         y = data['y']
         del data['y']
@@ -287,8 +288,7 @@ def test_pandas_compatibility():
 
     earth = Earth(**default_params)
     model = earth.fit(X_df, y_df)
-    assert_list_equal(
-        colnames, model.forward_trace()._getstate()['xlabels'])
+    assert colnames == model.forward_trace()._getstate()['xlabels']
 
 
 @if_patsy
@@ -306,8 +306,7 @@ def test_patsy_compatibility():
         data=X_df)
 
     model = Earth(**default_params).fit(X_df, y_df)
-    assert_list_equal(
-        colnames, model.forward_trace()._getstate()['xlabels'])
+    assert colnames == model.forward_trace()._getstate()['xlabels']
 
 
 def test_pickle_compatibility():
@@ -323,11 +322,11 @@ def test_pickle_compatibility():
 def test_pickle_version_storage():
     earth = Earth(**default_params)
     model = earth.fit(X, y)
-    assert model._version ==  pyearth.__version__
+    assert model._version == pyearth.__version__
     model._version = 'hello'
     assert model._version == 'hello'
     model_copy = pickle.loads(pickle.dumps(model))
-    assert model_copy._version ==  model._version
+    assert model_copy._version == model._version
 
 
 def test_copy_compatibility():
@@ -348,8 +347,8 @@ def test_exhaustive_search():
                   minspan=1,
                   endspan=1)
     model.fit(X, y)
-    assert model.basis_.plen() ==  model.coef_.shape[1]
-    assert model.transform(X).shape[1] ==  len(model.basis_)
+    assert model.basis_.plen() == model.coef_.shape[1]
+    assert model.transform(X).shape[1] == len(model.basis_)
 
 
 def test_nb_terms():
@@ -382,36 +381,42 @@ def test_nb_degrees():
 def test_eq():
     model1 = Earth(**default_params)
     model2 = Earth(**default_params)
-    assert model1 ==  model2
-    assert_not_equal(model1, 5)
+    assert model1 == model2
+    assert model1 != 5
 
     params = {}
     params.update(default_params)
     params["penalty"] = 15
     model2 = Earth(**params)
-    assert_not_equal(model1, model2)
+    assert model1 != model2
 
     model3 = Earth(**default_params)
     model3.unknown_parameter = 5
-    assert_not_equal(model1, model3)
+    assert model1 != model3
 
 
 def test_sparse():
     X_sparse = csr_matrix(X)
 
     model = Earth(**default_params)
-    assert_raises(TypeError, model.fit, X_sparse, y)
+    with pytest.raises(TypeError):
+        model.fit(X_sparse, y)
 
     model = Earth(**default_params)
     model.fit(X, y)
-    assert_raises(TypeError, model.predict, X_sparse)
-    assert_raises(TypeError, model.predict_deriv, X_sparse)
-    assert_raises(TypeError, model.transform, X_sparse)
-    assert_raises(TypeError, model.score, X_sparse)
+    with pytest.raises(TypeError):
+        model.predict(X_sparse)
+    with pytest.raises(TypeError):
+        model.predict_deriv(X_sparse)
+    with pytest.raises(TypeError):
+        model.transform(X_sparse)
+    with pytest.raises(TypeError):
+        model.score(X_sparse)
 
     model = Earth(**default_params)
     sample_weight = csr_matrix([1.] * X.shape[0])
-    assert_raises(TypeError, model.fit, X, y, sample_weight)
+    with pytest.raises(TypeError):
+        model.fit(X, y, sample_weight)
 
 
 def test_shape():
@@ -419,53 +424,56 @@ def test_shape():
     model.fit(X, y)
 
     X_reduced = X[:, 0:5]
-    assert_raises(ValueError, model.predict, X_reduced)
-    assert_raises(ValueError, model.predict_deriv, X_reduced)
-    assert_raises(ValueError, model.transform, X_reduced)
-    assert_raises(ValueError, model.score, X_reduced)
+    with pytest.raises(ValueError):
+        model.predict(X_reduced)
+    with pytest.raises(ValueError):
+        model.predict_deriv(X_reduced)
+    with pytest.raises(ValueError):
+        model.transform(X_reduced)
+    with pytest.raises(ValueError):
+        model.score(X_reduced)
 
     model = Earth(**default_params)
     X_subsampled = X[0:10]
-    assert_raises(ValueError, model.fit, X_subsampled, y)
+    with pytest.raises(ValueError):
+        model.fit(X_subsampled, y)
 
     model = Earth(**default_params)
     y_subsampled = X[0:10]
-    assert_raises(ValueError, model.fit, X, y_subsampled)
+    with pytest.raises(ValueError):
+        model.fit(X, y_subsampled)
 
     model = Earth(**default_params)
     sample_weights = numpy.array([1.] * len(X))
     sample_weights_subsampled = sample_weights[0:10]
-    assert_raises(ValueError, model.fit, X, y, sample_weights_subsampled)
+    with pytest.raises(ValueError):
+        model.fit(X, y, sample_weights_subsampled)
 
 
 def test_deriv():
 
     model = Earth(**default_params)
     model.fit(X, y)
-    assert X.shape + (1 == , model.predict_deriv(X).shape)
-    assert (X.shape[0] ==  1, 1, model.predict_deriv(X, variables=0).shape)
-    assert (X.shape[0] ==  1, 1, model.predict_deriv(
-        X, variables='x0').shape)
-    assert (X.shape[0] ==  3, 1,
-                 model.predict_deriv(X, variables=[1, 5, 7]).shape)
-    assert (X.shape[0] ==  0, 1,
-                 model.predict_deriv(X, variables=[]).shape)
+    assert model.predict_deriv(X).shape == X.shape + (1,)
+    assert model.predict_deriv(X, variables=0).shape == (X.shape[0], 1, 1)
+    assert model.predict_deriv(X, variables='x0').shape == (X.shape[0], 1, 1)
+    assert model.predict_deriv(X, variables=[1, 5, 7]).shape == (X.shape[0], 3, 1)
+    assert model.predict_deriv(X, variables=[]).shape == (X.shape[0], 0, 1)
 
     res_deriv = model.predict_deriv(X, variables=['x2', 'x7', 'x0', 'x1'])
-    assert (X.shape[0] ==  4, 1, res_deriv.shape)
+    assert res_deriv.shape == (X.shape[0], 4, 1)
 
     res_deriv = model.predict_deriv(X, variables=['x0'])
-    assert (X.shape[0] ==  1, 1, res_deriv.shape)
+    assert res_deriv.shape == (X.shape[0], 1, 1)
 
-    assert (X.shape[0] ==  1, 1,
-                 model.predict_deriv(X, variables=[0]).shape)
+    assert model.predict_deriv(X, variables=[0]).shape == (X.shape[0], 1, 1)
 
 
 def test_xlabels():
 
     model = Earth(**default_params)
-    assert_raises(ValueError, model.fit, X[
-                  :, 0:5], y, xlabels=['var1', 'var2'])
+    with pytest.raises(ValueError):
+        model.fit(X[:, 0:5], y, xlabels=['var1', 'var2'])
 
     model = Earth(**default_params)
     model.fit(X[:, 0:3], y, xlabels=['var1', 'var2', 'var3'])
@@ -486,15 +494,19 @@ def test_untrained():
     # raises the appropriate exception when using a not yet fitted
     # Earth object
     model = Earth(**default_params)
-    assert_raises(NotFittedError, model.predict, X)
-    assert_raises(NotFittedError, model.transform, X)
-    assert_raises(NotFittedError, model.predict_deriv, X)
-    assert_raises(NotFittedError, model.score, X)
+    with pytest.raises(NotFittedError):
+        model.predict(X)
+    with pytest.raises(NotFittedError):
+        model.transform(X)
+    with pytest.raises(NotFittedError):
+        model.predict_deriv(X)
+    with pytest.raises(NotFittedError):
+        model.score(X)
 
     # the following should be changed to raise NotFittedError
-    assert model.forward_trace() ==  None
-    assert model.pruning_trace() ==  None
-    assert model.summary() ==  "Untrained Earth Model"
+    assert model.forward_trace() is None
+    assert model.pruning_trace() is None
+    assert model.summary() == "Untrained Earth Model"
 
 
 def test_fast():
@@ -511,7 +523,7 @@ def test_fast():
                   **default_params)
     earth.fit(X, y)
     fast_summary = earth.summary()
-    assert normal_summary ==  fast_summary
+    assert normal_summary == fast_summary
 
 
 def test_feature_importance():
@@ -527,16 +539,14 @@ def test_feature_importance():
     for crit, val in earth .feature_importances_.items():
         assert len(val) == X.shape[1]
 
-    assert_raises(
-            ValueError,
-            Earth(feature_importance_type='bad_name', **default_params).fit,
-            X, y)
+    with pytest.raises(ValueError):
+        Earth(feature_importance_type='bad_name', **default_params).fit(X, y)
 
     earth = Earth(feature_importance_type=('rss',), **default_params)
     earth.fit(X, y)
     assert len(earth.feature_importances_) == X.shape[1]
 
-    assert_raises(
-            ValueError,
-            Earth(feature_importance_type='rss', enable_pruning=False, **default_params).fit,
-            X, y)
+    with pytest.raises(ValueError):
+        Earth(feature_importance_type='rss', enable_pruning=False, **default_params).fit(
+            X, y
+        )

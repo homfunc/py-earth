@@ -1,8 +1,6 @@
 import pickle
 import numpy
 
-from nose.tools import assert_equal, assert_true
-
 from .base import BaseContainer
 from pyearth._types import BOOL
 from pyearth._basis import LinearBasisFunction, ConstantBasisFunction
@@ -32,13 +30,13 @@ def test_apply_deriv():
     b = numpy.empty(shape=m)
     j = numpy.empty(shape=m)
     cnt.bf.apply_deriv(cnt.X, missing, b, j, 1)
-    numpy.testing.assert pytest.approx(b) ==  cnt.X[:, 1]
-    numpy.testing.assert pytest.approx(j) ==  1.0
+    numpy.testing.assert_allclose(b, cnt.X[:, 1])
+    numpy.testing.assert_allclose(j, 1.0)
 
 
 def test_degree():
     cnt = Container()
-    assert cnt.bf.degree() ==  1
+    assert cnt.bf.degree() == 1
 
 
 def test_pickle_compatibility():
@@ -52,4 +50,4 @@ def test_smoothed_version():
     translation = {cnt.parent: cnt.parent._smoothed_version(None, {}, {})}
     smoothed = cnt.bf._smoothed_version(cnt.parent, {}, translation)
     assert isinstance(smoothed, LinearBasisFunction)
-    assert smoothed.get_variable() ==  cnt.bf.get_variable()
+    assert smoothed.get_variable() == cnt.bf.get_variable()

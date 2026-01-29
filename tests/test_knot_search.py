@@ -6,9 +6,9 @@ from pyearth._knot_search import (MultipleOutcomeDependentData,
                                   knot_search,
                                   SingleWeightDependentData,
                                   SingleOutcomeDependentData)
-from nose.tools import assert_equal
+import pytest
 import numpy as np
-from numpy.testing.utils import assert_almost_equal, assert_array_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
 from scipy.linalg import qr
 
 
@@ -30,11 +30,11 @@ def test_outcome_dependent_data():
         if k >= 99:
             1 + 1
         data.update()
-        assert code ==  0
+        assert code == 0
         assert_almost_equal(
             np.dot(weight.Q_t[:k + 1, :], np.transpose(weight.Q_t[:k + 1, :])),
             np.eye(k + 1))
-    assert weight.update_from_array(b) ==  -1
+    assert weight.update_from_array(b) == -1
 #     data.update(1e-16)
 
     # Test downdating
@@ -44,23 +44,23 @@ def test_outcome_dependent_data():
     data.downdate()
     weight.update_from_array(b)
     data.update()
-    assert pytest.approx(q) ==  np.array(weight.Q_t)
-    assert pytest.approx(theta) ==  np.array(data.theta[:max_terms])
+    np.testing.assert_allclose(q, np.array(weight.Q_t))
+    np.testing.assert_allclose(theta, np.array(data.theta[:max_terms]))
     assert_almost_equal(
         np.array(data.theta[:max_terms]), np.dot(weight.Q_t, w * y))
     wB = B * w[:, None]
     Q, _ = qr(wB, pivoting=False, mode='economic')
-    assert pytest.approx(np.abs(np.dot(weight.Q_t) ==  Q), np.eye(max_terms))
+    np.testing.assert_allclose(np.abs(weight.Q_t), np.abs(Q.T))
 
     # Test that reweighting works
-    assert data.k ==  max_terms
+    assert data.k == max_terms
     w2 = np.random.normal(size=m) ** 2
     weight.reweight(w2, B, max_terms)
     data.synchronize()
     assert data.k ==  max_terms
     w2B = B * w2[:, None]
     Q2, _ = qr(w2B, pivoting=False, mode='economic')
-    assert pytest.approx(np.abs(np.dot(weight.Q_t) ==  Q2), np.eye(max_terms))
+    np.testing.assert_allclose(np.abs(weight.Q_t), np.abs(Q2.T))
     assert_almost_equal(
         np.array(data.theta[:max_terms]), np.dot(weight.Q_t, w2 * y))
 
@@ -181,16 +181,16 @@ def test_knot_search():
     best_knot, best_k, best_e = slow_knot_search(p, x, B, candidates, outcomes)
 
     # Test the test
-    assert pytest.approx(best_knot) ==  knot
-    assert r ==  len(candidates)
-    assert m ==  B.shape[0]
-    assert q ==  B.shape[1]
-    assert len(outcomes) ==  n_outcomes
+    assert pytest.approx(best_knot) == knot
+    assert r == len(candidates)
+    assert m == B.shape[0]
+    assert q == B.shape[1]
+    assert len(outcomes) == n_outcomes
 
     # Run fast knot search and compare results to slow knot search
     fast_best_knot, fast_best_k, fast_best_e = knot_search(data, candidates,
                                                            p, q, m, r,
                                                            len(outcomes), 0)
     assert pytest.approx(fast_best_knot) ==  best_knot
-    assert candidates[fast_best_k] ==  candidates[best_k]
-    assert pytest.approx(fast_best_e) ==  best_e
+    assert candidates[fast_best_k] == candidates[best_k]
+    assert pytest.approx(fast_best_e) == best_e

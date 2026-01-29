@@ -23,6 +23,10 @@ ruff = ">=0.1.0"
 mypy = ">=1.0"
 setuptools-scm = "*"
 wheel = "*"
+python-build = "*"
+
+[workspace.build-variants]
+python = ["3.11.*", "3.12.*", "3.13.*", "3.14.*"]
 
 [feature.docs.dependencies]
 sphinx-gallery = ">=0.7"
@@ -37,11 +41,27 @@ statsmodels = ">=0.12"
 patsy = ">=0.5"
 sympy = ">=1.0"
 
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.py312.dependencies]
+python = "3.12.*"
+
+[feature.py313.dependencies]
+python = "3.13.*"
+
+[feature.py314.dependencies]
+python = "3.14.*"
+
 [environments]
 default = { features = ["dev"] }
 docs = { features = ["dev", "docs"] }
 export = { features = ["dev", "export"] }
 all-tests = { features = ["dev", "all-tests"] }
+py311 = { features = ["py311", "dev", "all-tests"] }
+py312 = { features = ["py312", "dev", "all-tests"] }
+py313 = { features = ["py313", "dev", "all-tests"] }
+py314 = { features = ["py314", "dev", "all-tests"] }
 
 [tasks]
 
@@ -77,4 +97,3 @@ build-docs = { cmd = "cd doc && make html", depends-on = ["build-editable"] }
 # Clean tasks
 clean = { cmd = "rm -rf build dist *.egg-info src/**/*.so src/**/*.pyc **/__pycache__" }
 clean-all = { cmd = "pixi run clean && rm -rf .pixi .pytest_cache .coverage coverage .mypy_cache" }
-six = ">=1.16"

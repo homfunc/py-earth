@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-earth"
-version = "0.1.0"
+version = "0.1.11"
 license = {file = "LICENSE.txt"}
 description = "A Python implementation of Jerome Friedman's Multivariate Adaptive Regression Splines."
 authors = [

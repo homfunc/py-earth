@@ -7,8 +7,12 @@ from sklearn.utils.validation import (assert_all_finite, check_is_fitted,
                                       check_X_y)
 import numpy as np
 from scipy import sparse
-from ._version import get_versions
-__version__ = get_versions()['version']
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("pyearth")
+except PackageNotFoundError:
+    __version__ = "0+unknown"
 
 class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
 
@@ -400,6 +404,8 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
                             'is required. Use X.toarray() to convert to '
                             'dense.')
         X = np.asarray(X, dtype=np.float64, order='F')
+        if not X.flags.writeable:
+            X = np.array(X, dtype=np.float64, order='F', copy=True)
         
         # Figure out missingness
         missing_is_nan = False
@@ -433,6 +439,8 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
         
         # Convert to internally used data type
         missing = np.asarray(missing, dtype=BOOL, order='F')
+        if not missing.flags.writeable:
+            missing = missing.copy(order='F')
         assert_all_finite(missing)
         if missing.ndim == 1:
             missing = missing[:, np.newaxis]
@@ -466,6 +474,8 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
 
         # Convert y to internally used data type
         y = np.asarray(y, dtype=np.float64)
+        if not y.flags.writeable:
+            y = y.copy()
         assert_all_finite(y)
 
         if len(y.shape) == 1:
@@ -476,12 +486,16 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
             sample_weight = np.ones((y.shape[0], 1), dtype=y.dtype)
         else:
             sample_weight = np.asarray(sample_weight, dtype=np.float64)
+            if not sample_weight.flags.writeable:
+                sample_weight = sample_weight.copy()
             assert_all_finite(sample_weight)
             if len(sample_weight.shape) == 1:
                 sample_weight = sample_weight[:, np.newaxis]
         # Deal with output_weight
         if output_weight is not None:
             output_weight = np.asarray(output_weight, dtype=np.float64)
+            if not output_weight.flags.writeable:
+                output_weight = output_weight.copy()
             assert_all_finite(output_weight)
 
         # Make sure dimensions match
@@ -507,8 +521,12 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
         assert_all_finite(output_weight)
 
         # Make sure everything is consistent
-        check_X_y(X, y, accept_sparse=False, multi_output=True,
-                  force_all_finite=False)
+        try:
+            check_X_y(X, y, accept_sparse=False, multi_output=True,
+                      ensure_all_finite=False)
+        except TypeError:
+            check_X_y(X, y, accept_sparse=False, multi_output=True,
+                      force_all_finite=False)
 
         return X, y, sample_weight, None, missing
 
@@ -1054,7 +1072,7 @@ class Earth(BaseEstimator, RegressorMixin, TransformerMixin):
 
             coef, resid = np.linalg.lstsq(B, weighted_y[:, i])[0:2]
             self.coef_.append(coef)
-            if not resid:
+            if resid.size == 0:
                 resid = np.array(
                     [np.sum((np.dot(B, coef) - weighted_y[:, i]) ** 2)])
             resid_.append(resid)

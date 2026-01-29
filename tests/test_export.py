@@ -2,15 +2,13 @@ from pyearth._basis import (Basis, ConstantBasisFunction, HingeBasisFunction,
                             LinearBasisFunction)
 from pyearth.export import export_python_function, export_python_string,\
     export_sympy
-from nose.tools import assert_almost_equal
 import numpy
-import six
+import pytest
 from pyearth import Earth
 from pyearth._types import BOOL
-from pyearth.test.testing_utils import if_pandas,\
-    if_sympy
+from .testing_utils import if_pandas, if_sympy
 from itertools import product
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 numpy.random.seed(0)
 
@@ -49,7 +47,7 @@ def test_export_python_string():
     for smooth in (True, False):
         model = Earth(penalty=1, smooth=smooth, max_degree=2).fit(X, y)
         export_model = export_python_string(model, 'my_test_model')
-        six.exec_(export_model, globals())
+        exec(export_model, globals())
         for exp_pred, model_pred in zip(model.predict(X), my_test_model(X)):
             assert pytest.approx(exp_pred) ==  model_pred
 
@@ -76,11 +74,12 @@ def test_export_sympy():
         y_df = pd.DataFrame(Y[:, :n_cols])
         if allow_missing:
             # Randomly remove some values so that the fitted model contains MissingnessBasisFunctions
-            X_df['x_1'][numpy.random.binomial(n=1, p=.1, size=X_df.shape[0]).astype(bool)] = numpy.nan
+            mask = numpy.random.binomial(n=1, p=.1, size=X_df.shape[0]).astype(bool)
+            X_df.loc[mask, 'x_1'] = numpy.nan
 
         model = Earth(allow_missing=allow_missing, smooth=smooth, max_degree=2).fit(X_df, y_df)
         expressions = export_sympy(model) if n_cols > 1 else [export_sympy(model)]
-        module_dict = {'select': numpy.select, 'less_equal': numpy.less_equal, 'isnan': numpy.isnan,
+        module_dict = {'numpy': numpy, 'select': numpy.select, 'less_equal': numpy.less_equal, 'isnan': numpy.isnan,
                        'greater_equal':numpy.greater_equal, 'logical_and': numpy.logical_and, 'less': numpy.less,
                        'logical_not':numpy.logical_not, "greater": numpy.greater, 'maximum':numpy.maximum,
                        'Missing': lambda x: numpy.isnan(x).astype(float),
@@ -91,7 +90,12 @@ def test_export_sympy():
         for i, expression in enumerate(expressions):
             # The lambdified functions for smoothed basis functions only work with modules='numpy' and
             # for regular basis functions with modules={'Max':numpy.maximum}.  This is a confusing situation
-            func = lambdify(X_df.columns, expression, printer=PyEarthNumpyPrinter, modules=module_dict)
+            func = lambdify(
+                X_df.columns,
+                expression,
+                printer=PyEarthNumpyPrinter({'strict': False}),
+                modules=module_dict,
+            )
             y_pred_sympy = func(*[X_df.loc[:,var] for var in X_df.columns])
 
             y_pred = model.predict(X_df)[:,i] if n_cols > 1 else model.predict(X_df)
